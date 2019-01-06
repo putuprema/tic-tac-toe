@@ -2,19 +2,20 @@
 #include <string.h>
 #include <windows.h>
 #include <time.h>
+#include <conio.h>
 
 char tic[4][4] = {}, playerOne[23], playerTwo[23];
-int x_rowCount=0, x_colCount=0, o_rowCount=0, o_colCount=0, x_wins, o_wins, allCellsFilled, giliran;
+int x_rowCount=0, x_colCount=0, o_rowCount=0, o_colCount=0, x_wins, o_wins, allCellsFilled, giliran, coorX=0, coorY=0;
 
 void cetakHeader() {
 	system("cls");
 	printf("##################################################################################\n");
-	printf("#                    Tic Tac Toe by Putu Prema (Early Access)                    #\n");
+	printf("#                         Tic Tac Toe by Putu Prema (v2)                         #\n");
 	printf("##################################################################################\n\n");	
 }			
 
 void init() {
-	x_rowCount=0, x_colCount=0, o_rowCount=0, o_colCount=0, x_wins=0, o_wins=0, allCellsFilled=0, giliran=1;
+	x_rowCount=0, x_colCount=0, o_rowCount=0, o_colCount=0, x_wins=0, o_wins=0, allCellsFilled=0, giliran=1, coorX=0, coorY=0;
 	for (int i=0; i<4; i++) {
 		for (int j=0; j<4; j++) {
 			tic[i][j] = '_';
@@ -31,7 +32,9 @@ void cetakTic() {
 	for (int i=0; i<3; i++) {
 		printf("%d|", i+1);
 		for (int j=0; j<3; j++) {
-			printf("%c|", tic[i][j]);
+			if (i == coorY && j == coorX && x_wins != 1 && o_wins != 1 && allCellsFilled != 1) {
+				printf("#|");
+			} else printf("%c|", tic[i][j]);
 		}
 		printf("\n");
 	}
@@ -139,9 +142,6 @@ void cekDraw() {
 }
 
 void randomize() {
-	time_t t;
-	srand((unsigned) time(&t));
-	
 	giliran = (rand() % 2) + 1;
 }
 
@@ -177,37 +177,42 @@ void goPlay() {
 		} else if ((allCellsFilled == 1) && (x_wins == o_wins)) {
 			printf("DRAW!\n"); break;		
 		} else {
+		}
+		
+		char a;
+		inputCoordinate:
+		do {
+			cetakHeader();
+			cetakTic();
 			if (giliran == 1) {
 				printf("%s\'s turn [\'X\']\n", playerOne, giliran);
 			} else if (giliran == 2) {
 				printf("%s\'s turn [\'O\']\n", playerTwo, giliran);
 			}
-		}
+			printf("Press f to confirm selection\n");
+			a = getch();
+			switch (a) {
+				case 'w' : if (coorY > 0) coorY--; break;
+				case 's' : if (coorY < 2) coorY++; break;
+				case 'a' : if (coorX > 0) coorX--; break;
+				case 'd' : if (coorX < 2) coorX++; break;
+			}
+		} while (a != 'f');
 		
-		inputCoordinate:
-		do {
-			printf("Input X Coordinate [1 - 3]: "); scanf("%d", &x);	
-		} while (x < 1 || x > 3);
-		
-		do {
-			printf("Input Y Coordinate [1 - 3]: "); scanf("%d", &y);
-		} while (y < 1 || y > 3);
-	
-		if (tic[y-1][x-1] != '_') {
-			printf("Coordinate X and Y has been taken!!\n");
+		if (tic[coorY][coorX] != '_') {
+			printf("Your choosen grid has been taken. Choose another!\n");
+			system("pause");
 			goto inputCoordinate;
 		}
 		
-		masukin(x-1,y-1);
+		masukin(coorX,coorY);
 		cekMenang();	
 		cekDraw();
 		
 		switch (giliran) {
 			case 1 : giliran = 2; break;
 			case 2 : giliran = 1; break;
-		}	
-
-		system("pause");			
+		}			
 	}
 }
 
@@ -215,7 +220,7 @@ void goHow() {
 	cetakHeader();
 	printf("How To Play :\n");
 	printf("1. The program will randomly generate which player start first\n");
-	printf("2. The player who have the turn will have to choose X and Y coordinates on the board\n");
+	printf("2. The player who have the turn will have to choose where to put his X\'s or O\'s on the board\n");
 	printf("3. The program will change the player each turn\n\n");
 	printf("How To Win :\n");
 	printf("One of the player must have 3 X\'s or O\'s in a row vertically or horizontally\n\n");
@@ -223,6 +228,10 @@ void goHow() {
 
 int main() {
 	int menuInput;
+	
+	// INITIALIZE RANDOM NUMBER GENERATOR
+	time_t t;
+	srand((unsigned) time(&t));
 	
 	mainMenu:
 	cetakHeader();
